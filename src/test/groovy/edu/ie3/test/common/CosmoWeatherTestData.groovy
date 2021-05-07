@@ -12,7 +12,7 @@ import tech.units.indriya.quantity.Quantities
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
-class PsdmWeatherTestData extends WeatherTestData {
+class CosmoWeatherTestData extends WeatherTestData {
 
 	public static final ZonedDateTime TIME_15H = ZonedDateTime.of(2020, 04, 28, 15, 0, 0, 0, ZoneId.of("UTC"))
 	public static final ZonedDateTime TIME_16H = ZonedDateTime.of(2020, 04, 28, 16, 0, 0, 0, ZoneId.of("UTC"))

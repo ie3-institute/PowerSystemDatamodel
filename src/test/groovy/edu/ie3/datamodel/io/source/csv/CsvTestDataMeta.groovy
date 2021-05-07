@@ -19,6 +19,9 @@ trait CsvTestDataMeta {
 	static String gridFolderPath = testParticipantsBaseFolderPath.concat(File.separator).concat("grid")
 	static String participantsFolderPath =  testParticipantsBaseFolderPath.concat(File.separator).concat("participants")
 	static String timeSeriesFolderPath =  testTimeSeriesBaseFolderPath
+	static String weatherFolderPath = new File(getClass().getResource('/weather').toURI()).absolutePath
+	static String cosmoWeatherFolderPath = weatherFolderPath.concat(File.separator).concat("cosmo")
+	static String iconWeatherFolderPath = weatherFolderPath.concat(File.separator).concat("icon")
 	static String thermalFolderPath = testParticipantsBaseFolderPath.concat(File.separator).concat("thermal")
 	static String coordinatesFolderPath = testParticipantsBaseFolderPath.concat(File.separator).concat("coordinates")
 

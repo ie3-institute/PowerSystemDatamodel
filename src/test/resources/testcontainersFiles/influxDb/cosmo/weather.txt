@@ -1,0 +1,13 @@
+# DDL
+CREATE DATABASE test_weather
+
+# DML
+# CONTEXT-DATABASE: test_weather
+
+
+weather,coordinate_id=193186 diffuse_irradiance=286.872985839844,direct_irradiance=282.671997070312,temperature=278.019012451172,wind_direction=0,wind_velocity=1.66103506088257 1588086000000
+weather,coordinate_id=193187 diffuse_irradiance=287.872985839844,direct_irradiance=283.671997070312,temperature=279.019012451172,wind_direction=0,wind_velocity=1.76103506088257 1588086000000
+weather,coordinate_id=193188 diffuse_irradiance=288.872985839844,direct_irradiance=284.671997070312,temperature=280.019012451172,wind_direction=0,wind_velocity=1.86103506088257 1588086000000
+weather,coordinate_id=193186 diffuse_irradiance=286.872,direct_irradiance=282.672,temperature=278.012,wind_direction=0,wind_velocity=1.662 1588089600000
+weather,coordinate_id=193187 diffuse_irradiance=287.872,direct_irradiance=283.672,temperature=279.012,wind_direction=0,wind_velocity=1.762 1588089600000
+weather,coordinate_id=193186 diffuse_irradiance=286.873,direct_irradiance=282.673,temperature=278.013,wind_direction=0,wind_velocity=1.663 1588093200000

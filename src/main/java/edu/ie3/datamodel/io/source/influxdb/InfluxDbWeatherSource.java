@@ -30,7 +30,8 @@ public class InfluxDbWeatherSource implements WeatherSource {
   private static final String WHERE = " where ";
   private static final String MEASUREMENT_NAME_WEATHER = "weather";
   private static final int MILLI_TO_NANO_FACTOR = 1000000;
-  private final String coordinateIdColumnName;
+
+  private final String coordinateIdFieldName;
   private final InfluxDbConnector connector;
   private final IdCoordinateSource coordinateSource;
   private final TimeBasedWeatherValueFactory weatherValueFactory;
@@ -50,7 +51,7 @@ public class InfluxDbWeatherSource implements WeatherSource {
     this.connector = connector;
     this.coordinateSource = coordinateSource;
     this.weatherValueFactory = weatherValueFactory;
-    this.coordinateIdColumnName = weatherValueFactory.getCoordinateIdFieldString();
+    this.coordinateIdFieldName = weatherValueFactory.getCoordinateIdFieldString();
   }
 
   @Override
@@ -152,21 +153,22 @@ public class InfluxDbWeatherSource implements WeatherSource {
     return measurementsMap.get(MEASUREMENT_NAME_WEATHER).stream()
         .map(
             fieldToValue -> {
-              Optional<Point> coordinate =
-                  coordinateSource.getCoordinate(
-                      Integer.parseInt(fieldToValue.remove(coordinateIdColumnName)));
-              if (!coordinate.isPresent()) return null;
-              fieldToValue.putIfAbsent("uuid", UUID.randomUUID().toString());
-
-              /* The factory expects camel case id's for fields -> Convert the keys */
-              Map<String, String> camelCaseFields =
+              /* The factory expects flat case id's for fields -> Convert the keys */
+              Map<String, String> flatCaseFields =
                   fieldToValue.entrySet().stream()
                       .collect(
                           Collectors.toMap(
-                              entry -> StringUtils.snakeCaseToCamelCase(entry.getKey()),
+                              entry ->
+                                  StringUtils.snakeCaseToCamelCase(entry.getKey()).toLowerCase(),
                               Map.Entry::getValue));
 
-              return new TimeBasedWeatherValueData(camelCaseFields, coordinate.get());
+              Optional<Point> coordinate =
+                  coordinateSource.getCoordinate(
+                      Integer.parseInt(flatCaseFields.remove(coordinateIdFieldName)));
+              if (!coordinate.isPresent()) return null;
+              flatCaseFields.putIfAbsent("uuid", UUID.randomUUID().toString());
+
+              return new TimeBasedWeatherValueData(flatCaseFields, coordinate.get());
             })
         .filter(Objects::nonNull)
         .map(weatherValueFactory::get);
@@ -205,7 +207,7 @@ public class InfluxDbWeatherSource implements WeatherSource {
   }
 
   private String createCoordinateConstraintString(int coordinateId) {
-    return "coordinate='" + coordinateId + "'";
+    return "coordinate_id='" + coordinateId + "'";
   }
 
   /**

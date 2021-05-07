@@ -6,7 +6,7 @@
 package edu.ie3.datamodel.io.factory.timeseries
 
 import edu.ie3.datamodel.models.StandardUnits
-import edu.ie3.test.common.PsdmWeatherTestData
+import edu.ie3.test.common.CosmoWeatherTestData
 import edu.ie3.util.TimeUtil
 import edu.ie3.util.quantities.PowerSystemUnits
 import edu.ie3.util.quantities.QuantityUtil
@@ -73,7 +73,7 @@ class IconTimeBasedWeatherValueFactoryTest extends Specification {
 	def "A time based weather value factory for ICON column scheme builds a single time based value correctly"() {
 		given:
 		def factory = new IconTimeBasedWeatherValueFactory()
-		def coordinate = PsdmWeatherTestData.COORDINATE_67775
+		def coordinate = CosmoWeatherTestData.COORDINATE_67775
 
 		def parameter = [
 			"datum"        : "2019-08-01 01:00:00",

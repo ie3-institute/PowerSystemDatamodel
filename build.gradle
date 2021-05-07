@@ -42,7 +42,7 @@ apply from: scriptsLocation + 'vcs.gradle'
 apply from: scriptsLocation + 'semVer.gradle'
 
 repositories {
-	jcenter() //searches in bintray's repository 'jCenter', which contains Maven Central
+	mavenCentral() // searches in Sonatype's repository 'Maven Central'
 	maven { url 'https://www.jitpack.io' } // allows github repos as dependencies
 
 	// sonatype snapshot repo

@@ -6,11 +6,12 @@
 package edu.ie3.datamodel.io.source.couchbase
 
 import edu.ie3.datamodel.io.connectors.CouchbaseConnector
-import edu.ie3.datamodel.io.factory.timeseries.PsdmTimeBasedWeatherValueFactory
+import edu.ie3.datamodel.io.factory.timeseries.CosmoTimeBasedWeatherValueFactory
+import edu.ie3.datamodel.io.factory.timeseries.TimeBasedWeatherValueFactory
 import edu.ie3.datamodel.models.timeseries.individual.IndividualTimeSeries
 import edu.ie3.datamodel.models.timeseries.individual.TimeBasedValue
 import edu.ie3.datamodel.models.value.WeatherValue
-import edu.ie3.test.common.PsdmWeatherTestData
+import edu.ie3.test.common.CosmoWeatherTestData
 import edu.ie3.test.helper.WeatherSourceTestHelper
 import edu.ie3.util.TimeUtil
 import edu.ie3.util.interval.ClosedInterval
@@ -25,7 +26,7 @@ import spock.lang.Specification
 import java.time.ZoneId
 
 @Testcontainers
-class CouchbaseWeatherSourcePsdmIT extends Specification implements WeatherSourceTestHelper {
+class CouchbaseWeatherSourceCosmoIT extends Specification implements WeatherSourceTestHelper {
 
 	@Shared
 	BucketDefinition bucketDefinition = new BucketDefinition("ie3_in")
@@ -37,11 +38,11 @@ class CouchbaseWeatherSourcePsdmIT extends Specification implements WeatherSourc
 	@Shared
 	CouchbaseWeatherSource source
 
-	static String coordinateIdColumnName = "coordinate"
+	static String coordinateIdColumnName = TimeBasedWeatherValueFactory.COORDINATE_ID_NAMING.flatCase()
 
 	def setupSpec() {
 		// Copy import file with json array of documents into docker
-		MountableFile couchbaseWeatherJsonsFile = MountableFile.forClasspathResource("/testcontainersFiles/couchbase/weather.json")
+		MountableFile couchbaseWeatherJsonsFile = MountableFile.forClasspathResource("/testcontainersFiles/couchbase/cosmo/weather.json")
 		couchbaseContainer.copyFileToContainer(couchbaseWeatherJsonsFile, "/home/weather.json")
 
 		// create an index for the document keys
@@ -62,8 +63,8 @@ class CouchbaseWeatherSourcePsdmIT extends Specification implements WeatherSourc
 				"--dataset", "file:///home/weather.json")
 
 		def connector = new CouchbaseConnector(couchbaseContainer.connectionString, bucketDefinition.name, couchbaseContainer.username, couchbaseContainer.password)
-		def weatherFactory = new PsdmTimeBasedWeatherValueFactory(new TimeUtil(ZoneId.of("UTC"), Locale.GERMANY, "yyyy-MM-dd'T'HH:mm:ssxxx"))
-		source = new CouchbaseWeatherSource(connector, PsdmWeatherTestData.coordinateSource, coordinateIdColumnName, weatherFactory)
+		def weatherFactory = new CosmoTimeBasedWeatherValueFactory(new TimeUtil(ZoneId.of("UTC"), Locale.GERMANY, "yyyy-MM-dd'T'HH:mm:ssxxx"))
+		source = new CouchbaseWeatherSource(connector, CosmoWeatherTestData.coordinateSource, weatherFactory)
 	}
 
 	def "The test container can establish a valid connection"() {
@@ -75,10 +76,10 @@ class CouchbaseWeatherSourcePsdmIT extends Specification implements WeatherSourc
 
 	def "A CouchbaseWeatherSource can read and correctly parse a single value for a specific date and coordinate"() {
 		given:
-		def expectedTimeBasedValue = new TimeBasedValue(PsdmWeatherTestData.TIME_15H, PsdmWeatherTestData.WEATHER_VALUE_193186_15H)
+		def expectedTimeBasedValue = new TimeBasedValue(CosmoWeatherTestData.TIME_15H, CosmoWeatherTestData.WEATHER_VALUE_193186_15H)
 
 		when:
-		def optTimeBasedValue = source.getWeather(PsdmWeatherTestData.TIME_15H, PsdmWeatherTestData.COORDINATE_193186)
+		def optTimeBasedValue = source.getWeather(CosmoWeatherTestData.TIME_15H, CosmoWeatherTestData.COORDINATE_193186)
 
 		then:
 		optTimeBasedValue.present
@@ -88,49 +89,49 @@ class CouchbaseWeatherSourcePsdmIT extends Specification implements WeatherSourc
 	def "A CouchbaseWeatherSource can read multiple time series values for multiple coordinates"() {
 		given:
 		def coordinates = [
-			PsdmWeatherTestData.COORDINATE_193186,
-			PsdmWeatherTestData.COORDINATE_193187
+			CosmoWeatherTestData.COORDINATE_193186,
+			CosmoWeatherTestData.COORDINATE_193187
 		]
-		def timeInterval = new ClosedInterval(PsdmWeatherTestData.TIME_16H, PsdmWeatherTestData.TIME_17H)
+		def timeInterval = new ClosedInterval(CosmoWeatherTestData.TIME_16H, CosmoWeatherTestData.TIME_17H)
 		def timeSeries193186 = new IndividualTimeSeries(null,
 				[
-					new TimeBasedValue(PsdmWeatherTestData.TIME_16H, PsdmWeatherTestData.WEATHER_VALUE_193186_16H),
-					new TimeBasedValue(PsdmWeatherTestData.TIME_17H, PsdmWeatherTestData.WEATHER_VALUE_193186_17H)]
+					new TimeBasedValue(CosmoWeatherTestData.TIME_16H, CosmoWeatherTestData.WEATHER_VALUE_193186_16H),
+					new TimeBasedValue(CosmoWeatherTestData.TIME_17H, CosmoWeatherTestData.WEATHER_VALUE_193186_17H)]
 				as Set<TimeBasedValue>)
 		def timeSeries193187 = new IndividualTimeSeries(null,
 				[
-					new TimeBasedValue(PsdmWeatherTestData.TIME_16H, PsdmWeatherTestData.WEATHER_VALUE_193187_16H)] as Set<TimeBasedValue>)
+					new TimeBasedValue(CosmoWeatherTestData.TIME_16H, CosmoWeatherTestData.WEATHER_VALUE_193187_16H)] as Set<TimeBasedValue>)
 		when:
 		Map<Point, IndividualTimeSeries<WeatherValue>> coordinateToTimeSeries = source.getWeather(timeInterval, coordinates)
 		then:
 		coordinateToTimeSeries.keySet().size() == 2
-		equalsIgnoreUUID(coordinateToTimeSeries.get(PsdmWeatherTestData.COORDINATE_193186), timeSeries193186)
-		equalsIgnoreUUID(coordinateToTimeSeries.get(PsdmWeatherTestData.COORDINATE_193187), timeSeries193187)
+		equalsIgnoreUUID(coordinateToTimeSeries.get(CosmoWeatherTestData.COORDINATE_193186), timeSeries193186)
+		equalsIgnoreUUID(coordinateToTimeSeries.get(CosmoWeatherTestData.COORDINATE_193187), timeSeries193187)
 	}
 
 
 
 	def "A CouchbaseWeatherSource can read all weather data in a given time interval"() {
 		given:
-		def timeInterval = new ClosedInterval(PsdmWeatherTestData.TIME_15H, PsdmWeatherTestData.TIME_17H)
+		def timeInterval = new ClosedInterval(CosmoWeatherTestData.TIME_15H, CosmoWeatherTestData.TIME_17H)
 		def timeSeries193186 = new IndividualTimeSeries(null,
 				[
-					new TimeBasedValue(PsdmWeatherTestData.TIME_15H, PsdmWeatherTestData.WEATHER_VALUE_193186_15H),
-					new TimeBasedValue(PsdmWeatherTestData.TIME_16H, PsdmWeatherTestData.WEATHER_VALUE_193186_16H),
-					new TimeBasedValue(PsdmWeatherTestData.TIME_17H, PsdmWeatherTestData.WEATHER_VALUE_193186_17H)] as Set<TimeBasedValue>)
+					new TimeBasedValue(CosmoWeatherTestData.TIME_15H, CosmoWeatherTestData.WEATHER_VALUE_193186_15H),
+					new TimeBasedValue(CosmoWeatherTestData.TIME_16H, CosmoWeatherTestData.WEATHER_VALUE_193186_16H),
+					new TimeBasedValue(CosmoWeatherTestData.TIME_17H, CosmoWeatherTestData.WEATHER_VALUE_193186_17H)] as Set<TimeBasedValue>)
 		def timeSeries193187 = new IndividualTimeSeries(null,
 				[
-					new TimeBasedValue(PsdmWeatherTestData.TIME_15H, PsdmWeatherTestData.WEATHER_VALUE_193187_15H),
-					new TimeBasedValue(PsdmWeatherTestData.TIME_16H, PsdmWeatherTestData.WEATHER_VALUE_193187_16H)] as Set<TimeBasedValue>)
+					new TimeBasedValue(CosmoWeatherTestData.TIME_15H, CosmoWeatherTestData.WEATHER_VALUE_193187_15H),
+					new TimeBasedValue(CosmoWeatherTestData.TIME_16H, CosmoWeatherTestData.WEATHER_VALUE_193187_16H)] as Set<TimeBasedValue>)
 		def timeSeries193188 = new IndividualTimeSeries(null,
 				[
-					new TimeBasedValue(PsdmWeatherTestData.TIME_15H, PsdmWeatherTestData.WEATHER_VALUE_193188_15H)] as Set<TimeBasedValue>)
+					new TimeBasedValue(CosmoWeatherTestData.TIME_15H, CosmoWeatherTestData.WEATHER_VALUE_193188_15H)] as Set<TimeBasedValue>)
 		when:
 		Map<Point, IndividualTimeSeries<WeatherValue>> coordinateToTimeSeries = source.getWeather(timeInterval)
 		then:
 		coordinateToTimeSeries.keySet().size() == 3
-		equalsIgnoreUUID(coordinateToTimeSeries.get(PsdmWeatherTestData.COORDINATE_193186).entries, timeSeries193186.entries)
-		equalsIgnoreUUID(coordinateToTimeSeries.get(PsdmWeatherTestData.COORDINATE_193187).entries, timeSeries193187.entries)
-		equalsIgnoreUUID(coordinateToTimeSeries.get(PsdmWeatherTestData.COORDINATE_193188).entries, timeSeries193188.entries)
+		equalsIgnoreUUID(coordinateToTimeSeries.get(CosmoWeatherTestData.COORDINATE_193186).entries, timeSeries193186.entries)
+		equalsIgnoreUUID(coordinateToTimeSeries.get(CosmoWeatherTestData.COORDINATE_193187).entries, timeSeries193187.entries)
+		equalsIgnoreUUID(coordinateToTimeSeries.get(CosmoWeatherTestData.COORDINATE_193188).entries, timeSeries193188.entries)
 	}
 }
