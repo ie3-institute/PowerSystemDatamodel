@@ -5,7 +5,7 @@
  */
 package edu.ie3.datamodel.io.source.csv
 
-import edu.ie3.datamodel.io.factory.timeseries.IconIdCoordinateFactory
+import edu.ie3.datamodel.io.factory.timeseries.CosmoIdCoordinateFactory
 import edu.ie3.util.geo.CoordinateDistance
 import edu.ie3.util.geo.GeoUtils
 import spock.lang.Shared
@@ -14,22 +14,21 @@ import spock.lang.Specification
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
-class IconCsvIdCoordinateSourceIT extends Specification implements CsvTestDataMeta {
+class CsvIdCoordinateSourceCosmoIT extends Specification implements CsvTestDataMeta {
 
 	@Shared
 	CsvIdCoordinateSource source
 
 	def setupSpec() {
-		source = new CsvIdCoordinateSource(csvSep, coordinatesFolderPath + "_icon", entityPersistenceNamingStrategy, new IconIdCoordinateFactory())
+		source = new CsvIdCoordinateSource(csvSep, coordinatesFolderPath + "_cosmo", entityPersistenceNamingStrategy, new CosmoIdCoordinateFactory())
 	}
 
 	def "The CsvCoordinateSource is able to create a valid stream from a coordinate file"() {
 		def expectedStream = Stream.of(
-				["id": "67775", "latitude": "51.5", "longitude": "7.438", "coordinatetype": "ICON"],
-				["id": "531137", "latitude": "51.5", "longitude": "7.375", "coordinatetype": "ICON"],
-				["id": "551525", "latitude": "51.438", "longitude": "7.438", "coordinatetype": "ICON"],
-				["id": "278150", "latitude": "51.438", "longitude": "7.375", "coordinatetype": "ICON"]
-				)
+				["id": "106580", "latgeo": "39.602772", "latrot": "-10", "longgeo": "1.279336", "longrot": "-6.8125", "tid": "1"],
+				["id": "106581", "latgeo": "39.610001", "latrot": "-10", "longgeo": "1.358673", "longrot": "-6.75", "tid": "2"],
+				["id": "106582", "latgeo": "39.617161", "latrot": "-10", "longgeo": "1.438028", "longrot": "-6.6875", "tid": "3"],
+				["id": "106583", "latgeo": "39.624249", "latrot": "-10", "longgeo": "1.5174021", "longrot": "-6.625", "tid": "4"])
 
 		when:
 		def actualStream = source.buildStreamWithFieldsToAttributesMap()
@@ -40,8 +39,8 @@ class IconCsvIdCoordinateSourceIT extends Specification implements CsvTestDataMe
 
 	def "The CsvIdCoordinateSource is able to look up a specific point or an empty Optional otherwise" () {
 		given:
-		def knownCoordinateId = 551525
-		def expectedPointA = Optional.of(GeoUtils.xyToPoint(7.438, 51.438))
+		def knownCoordinateId = 106582
+		def expectedPointA = Optional.of(GeoUtils.xyToPoint(1.438028, 39.617161))
 		def unknownCoordinateId = 42
 
 		when: "looking up a known coordinate id"
@@ -58,11 +57,11 @@ class IconCsvIdCoordinateSourceIT extends Specification implements CsvTestDataMe
 	}
 
 	def "The CsvIdCoordinateSource is able to look up specified points" () {
-		int[] ids = [67775, 551525, 278150]
+		int[] ids = 106580..106582
 		def expectedCoordinates = [
-			GeoUtils.xyToPoint(7.438, 51.5),
-			GeoUtils.xyToPoint(7.438, 51.438),
-			GeoUtils.xyToPoint(7.375, 51.438)
+			GeoUtils.xyToPoint(1.279336, 39.602772),
+			GeoUtils.xyToPoint(1.358673, 39.610001),
+			GeoUtils.xyToPoint(1.438028, 39.617161)
 		].toSet()
 
 		when:
@@ -73,8 +72,8 @@ class IconCsvIdCoordinateSourceIT extends Specification implements CsvTestDataMe
 	}
 
 	def "The CsvIdCoordinateSource is able to return a specific ID or an empty Optional otherwise" () {
-		def knownCoordinate = GeoUtils.xyToPoint(7.438, 51.438)
-		def expectedIdForA = Optional.of(551525)
+		def knownCoordinate = GeoUtils.xyToPoint(1.279336, 39.602772)
+		def expectedIdForA = Optional.of(106580)
 		def unknownCoordinate = GeoUtils.xyToPoint(14.39335, 48.035011)
 
 		when: "looking up an id of a known coordinate"
@@ -104,10 +103,10 @@ class IconCsvIdCoordinateSourceIT extends Specification implements CsvTestDataMe
 	def "The CsvIdCoordinateSource is able to return all available coordinates" () {
 		given:
 		def expectedCoordinates = [
-			GeoUtils.xyToPoint(7.438, 51.5),
-			GeoUtils.xyToPoint(7.375, 51.5),
-			GeoUtils.xyToPoint(7.438, 51.438),
-			GeoUtils.xyToPoint(7.375, 51.438)
+			GeoUtils.xyToPoint(1.279336, 39.602772),
+			GeoUtils.xyToPoint(1.358673, 39.610001),
+			GeoUtils.xyToPoint(1.438028, 39.617161),
+			GeoUtils.xyToPoint(1.5174021, 39.624249)
 		].toSet()
 
 		when:

@@ -30,6 +30,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Reworking the time series source (one source per time series, distinct mapping source, factory pattern)
 -   BREAKING: Moved methods `buildSafe{Coord,Point,LineString,LineStringBetweenCoords,LineStringBetweenPoints}`, `totalLengthOfLineString` from `GridAndGeoUtils` to `GeoUtils` in [_PowerSystemUtils_](https://github.com/ie3-institute/PowerSystemUtils)
 -   BREAKING: Moved `CoordinateDistance` to [_PowerSystemUtils_](https://github.com/ie3-institute/PowerSystemUtils)
+-   BREAKING: Weather source
+	-   Adapted data scheme (COSMO: `"coordinate"` to `"coordinate id"`, `"irradiation"` to `"irradiance"`, ICON: `"datum"` to `"time"`)
+	-   Harmonized the source of coordinate id column name across implementations of `WeatherSource`
+	-   Get field name in different casing (to actually get the column name in database, file, ...)
+	-   Force user to provide time stamp pattern to `CouchbaseWeatherSource` to ensure harmonized querying
+	-   Use naming convention dependent field names from factories within `InfluxDBWeatherSource`
 
 ### Fixed
 -   InfluxDbConnector now keeps session instead of creating a new one each call

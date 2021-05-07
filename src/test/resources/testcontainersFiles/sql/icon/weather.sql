@@ -1,6 +1,6 @@
 CREATE TABLE public.weather
 (
-    datum timestamp with time zone,
+    time timestamp with time zone,
     alb_rad double precision,
     asob_s double precision,
     aswdifd_s double precision,
@@ -29,8 +29,8 @@ CREATE TABLE public.weather
     p_65m double precision,
     sobs_rad double precision,
     t_131m double precision,
-    CONSTRAINT weather_pkey PRIMARY KEY (datum, coordinate_id),
-    CONSTRAINT weather_datum_coordinate_unique UNIQUE (datum, coordinate_id)
+    CONSTRAINT weather_pkey PRIMARY KEY (time, coordinate_id),
+    CONSTRAINT weather_time_coordinate_unique UNIQUE (time, coordinate_id)
 )
     WITH (
         OIDS = FALSE
@@ -44,11 +44,11 @@ CREATE INDEX weather_coordinate_idx
 
 CREATE INDEX weather_coordinate_time_idx
     ON public.weather USING btree
-        (coordinate_id ASC NULLS LAST, datum ASC NULLS LAST)
+        (coordinate_id ASC NULLS LAST, time ASC NULLS LAST)
     TABLESPACE pg_default;
 
 INSERT INTO
-    public.weather (datum, alb_rad, asob_s, aswdifd_s, aswdifu_s, aswdir_s, t_2m, t_g, u_10m, u_131m, u_20m, u_216m, u_65m, v_10m, v_131m, v_20m, v_216m, v_65m, w_131m, w_20m, w_216m, w_65m, z0, coordinate_id, p_131m, p_20m, p_65m, sobs_rad, t_131m)
+    public.weather (time, alb_rad, asob_s, aswdifd_s, aswdifu_s, aswdir_s, t_2m, t_g, u_10m, u_131m, u_20m, u_216m, u_65m, v_10m, v_131m, v_20m, v_216m, v_65m, w_131m, w_20m, w_216m, w_65m, z0, coordinate_id, p_131m, p_20m, p_65m, sobs_rad, t_131m)
 VALUES
 ('2019-08-01 15:00:00+0', 13.015240669, 503.469742643732, 228.021339757131, 80.8246124780934, 356.2648859375, 297.624199265982, 300.6632065669, 2.59460377536322, 3.76589711568313, 2.5812495613105, 3.94152121323647, 3.4740205817325, -0.0240786467212414, -0.0297608319165961, -0.0529678853045105, -0.00969812551875571, -0.0499661079932472, 0.00409144377409565, 0.0015809058504647, 0.00595448465750138, 0.00266634369620467, 0.955322166563199, 67775, NULL, NULL, NULL, NULL, NULL),
 ('2019-08-01 16:00:00+0', 13.015240669, 348.844393096138, 200.46049098038, 56.004364311073, 204.38963365625, 297.320002347335, 298.844773762216, 2.55725934195279, 4.01651967392677, 2.55434171324423, 4.20461049739088, 3.67091211581564, -0.384635762595304, -0.574806421919763, -0.400129700426715, -0.574231301551345, -0.548460101273113, 0.00842078158830364, 0.00402891995554883, 0.0103738560877878, 0.00642120845009564, 0.955323652611887, 67775, NULL, NULL, NULL, NULL, NULL),

@@ -7,6 +7,8 @@ package edu.ie3.datamodel.io.factory.timeseries;
 
 import edu.ie3.datamodel.models.value.WeatherValue;
 import edu.ie3.util.TimeUtil;
+import edu.ie3.util.naming.Naming;
+import edu.ie3.util.naming.NamingConvention;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -18,6 +20,8 @@ public abstract class TimeBasedWeatherValueFactory
     extends TimeBasedValueFactory<TimeBasedWeatherValueData, WeatherValue> {
   protected static final String UUID = "uuid";
   protected static final String TIME = "time";
+  /* Hold a case agnostic representation of the composite word "coordinate id", that allows for later case conversion */
+  protected static final Naming COORDINATE_ID_NAMING = Naming.from("coordinate", "id");
 
   protected final TimeUtil timeUtil;
 
@@ -35,11 +39,23 @@ public abstract class TimeBasedWeatherValueFactory
   }
 
   /**
-   * Return the field name for the coordinate id
+   * Return the field name for the coordinate id in flat case.
    *
    * @return the field name for the coordinate id
    */
-  public abstract String getCoordinateIdFieldString();
+  public String getCoordinateIdFieldString() {
+    return COORDINATE_ID_NAMING.flatCase();
+  }
+
+  /**
+   * Return the field name for the coordinate id in desired case.
+   *
+   * @param convention The desired naming convention / casing
+   * @return the field name for the coordinate id in appropriate case
+   */
+  public String getCoordinateIdFieldString(NamingConvention convention) {
+    return COORDINATE_ID_NAMING.as(convention);
+  }
 
   /**
    * Return the field name for the date time

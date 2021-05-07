@@ -6,7 +6,7 @@
 package edu.ie3.datamodel.io.factory.timeseries
 
 import edu.ie3.datamodel.models.StandardUnits
-import edu.ie3.test.common.PsdmWeatherTestData
+import edu.ie3.test.common.CosmoWeatherTestData
 import edu.ie3.util.TimeUtil
 import edu.ie3.util.quantities.PowerSystemUnits
 import edu.ie3.util.quantities.QuantityUtil
@@ -73,20 +73,20 @@ class IconTimeBasedWeatherValueFactoryTest extends Specification {
 	def "A time based weather value factory for ICON column scheme builds a single time based value correctly"() {
 		given:
 		def factory = new IconTimeBasedWeatherValueFactory()
-		def coordinate = PsdmWeatherTestData.COORDINATE_67775
+		def coordinate = CosmoWeatherTestData.COORDINATE_67775
 
 		def parameter = [
-			"datum"        : "2019-08-01 01:00:00",
-			"albRad"      : "13.015240669",
-			"asobS"       : "3.555093673828124",
-			"aswdifdS"    : "1.8088226191406245",
-			"aswdifuS"    : "0.5713421484374998",
-			"aswdirS"     : "2.317613203124999",
-			"t2m"         : "289.1179319051744",
-			"tg"          : "288.4101691197649",
-			"u10m"        : "0.3021732864307963",
-			"u131m"       : "2.6058700426057797",
-			"u20m"        : "0.32384365019387784",
+			"time"    : "2019-08-01 01:00:00",
+			"albRad"  : "13.015240669",
+			"asobS"   : "3.555093673828124",
+			"aswdifdS": "1.8088226191406245",
+			"aswdifuS": "0.5713421484374998",
+			"aswdirS" : "2.317613203124999",
+			"t2m"     : "289.1179319051744",
+			"tg"      : "288.4101691197649",
+			"u10m"    : "0.3021732864307963",
+			"u131m"   : "2.6058700426057797",
+			"u20m"    : "0.32384365019387784",
 			"u216m"       : "3.9015497418041756",
 			"u65m"        : "1.2823686334340363",
 			"v10m"        : "1.3852550649486943",

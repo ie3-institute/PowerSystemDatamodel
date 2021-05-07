@@ -15,6 +15,7 @@ import edu.ie3.datamodel.models.timeseries.individual.TimeBasedValue;
 import edu.ie3.datamodel.models.value.WeatherValue;
 import edu.ie3.util.StringUtils;
 import edu.ie3.util.interval.ClosedInterval;
+import edu.ie3.util.naming.NamingConvention;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,10 +31,35 @@ public class InfluxDbWeatherSource implements WeatherSource {
   private static final String WHERE = " where ";
   private static final String MEASUREMENT_NAME_WEATHER = "weather";
   private static final int MILLI_TO_NANO_FACTOR = 1000000;
-  private final String coordinateIdColumnName;
+  private static final NamingConvention DEFAULT_NAMING_CONVENTION = NamingConvention.SNAKE;
+
+  private final String coordinateIdFieldName;
   private final InfluxDbConnector connector;
   private final IdCoordinateSource coordinateSource;
   private final TimeBasedWeatherValueFactory weatherValueFactory;
+  private final NamingConvention namingConvention;
+
+  /**
+   * Initializes a new InfluxDbWeatherSource using the default naming convention.
+   *
+   * @param connector needed for database connection
+   * @param coordinateSource needed to map coordinates to ID as InfluxDB does not support spatial
+   *     types
+   * @param weatherValueFactory instance of a time based weather value factory
+   * @deprecated Use {@link InfluxDbWeatherSource#InfluxDbWeatherSource(InfluxDbConnector,
+   *     IdCoordinateSource, NamingConvention, TimeBasedWeatherValueFactory)}
+   */
+  @Deprecated
+  public InfluxDbWeatherSource(
+      InfluxDbConnector connector,
+      IdCoordinateSource coordinateSource,
+      TimeBasedWeatherValueFactory weatherValueFactory) {
+    this.connector = connector;
+    this.coordinateSource = coordinateSource;
+    this.namingConvention = DEFAULT_NAMING_CONVENTION;
+    this.weatherValueFactory = weatherValueFactory;
+    this.coordinateIdFieldName = weatherValueFactory.getCoordinateIdFieldString();
+  }
 
   /**
    * Initializes a new InfluxDbWeatherSource
@@ -41,16 +67,19 @@ public class InfluxDbWeatherSource implements WeatherSource {
    * @param connector needed for database connection
    * @param coordinateSource needed to map coordinates to ID as InfluxDB does not support spatial
    *     types
+   * @param namingConvention the naming convention used for features
    * @param weatherValueFactory instance of a time based weather value factory
    */
   public InfluxDbWeatherSource(
       InfluxDbConnector connector,
       IdCoordinateSource coordinateSource,
+      NamingConvention namingConvention,
       TimeBasedWeatherValueFactory weatherValueFactory) {
     this.connector = connector;
     this.coordinateSource = coordinateSource;
+    this.namingConvention = namingConvention;
     this.weatherValueFactory = weatherValueFactory;
-    this.coordinateIdColumnName = weatherValueFactory.getCoordinateIdFieldString();
+    this.coordinateIdFieldName = weatherValueFactory.getCoordinateIdFieldString();
   }
 
   @Override
@@ -152,21 +181,22 @@ public class InfluxDbWeatherSource implements WeatherSource {
     return measurementsMap.get(MEASUREMENT_NAME_WEATHER).stream()
         .map(
             fieldToValue -> {
-              Optional<Point> coordinate =
-                  coordinateSource.getCoordinate(
-                      Integer.parseInt(fieldToValue.remove(coordinateIdColumnName)));
-              if (!coordinate.isPresent()) return null;
-              fieldToValue.putIfAbsent("uuid", UUID.randomUUID().toString());
-
-              /* The factory expects camel case id's for fields -> Convert the keys */
-              Map<String, String> camelCaseFields =
+              /* The factory expects flat case id's for fields -> Convert the keys */
+              Map<String, String> flatCaseFields =
                   fieldToValue.entrySet().stream()
                       .collect(
                           Collectors.toMap(
-                              entry -> StringUtils.snakeCaseToCamelCase(entry.getKey()),
+                              entry ->
+                                  StringUtils.snakeCaseToCamelCase(entry.getKey()).toLowerCase(),
                               Map.Entry::getValue));
 
-              return new TimeBasedWeatherValueData(camelCaseFields, coordinate.get());
+              Optional<Point> coordinate =
+                  coordinateSource.getCoordinate(
+                      Integer.parseInt(flatCaseFields.remove(coordinateIdFieldName)));
+              if (!coordinate.isPresent()) return null;
+              flatCaseFields.putIfAbsent("uuid", UUID.randomUUID().toString());
+
+              return new TimeBasedWeatherValueData(flatCaseFields, coordinate.get());
             })
         .filter(Objects::nonNull)
         .map(weatherValueFactory::get);
@@ -194,18 +224,26 @@ public class InfluxDbWeatherSource implements WeatherSource {
   }
 
   private String createTimeConstraint(ClosedInterval<ZonedDateTime> timeInterval) {
-    return "time >= "
+    return weatherValueFactory.getTimeFieldString()
+        + " >= "
         + timeInterval.getLower().toInstant().toEpochMilli() * MILLI_TO_NANO_FACTOR
-        + " and time <= "
+        + " and "
+        + weatherValueFactory.getTimeFieldString()
+        + " <= "
         + timeInterval.getUpper().toInstant().toEpochMilli() * MILLI_TO_NANO_FACTOR;
   }
 
   private String createTimeConstraint(ZonedDateTime date) {
-    return "time=" + date.toInstant().toEpochMilli() * MILLI_TO_NANO_FACTOR;
+    return weatherValueFactory.getTimeFieldString()
+        + "="
+        + date.toInstant().toEpochMilli() * MILLI_TO_NANO_FACTOR;
   }
 
   private String createCoordinateConstraintString(int coordinateId) {
-    return "coordinate='" + coordinateId + "'";
+    return weatherValueFactory.getCoordinateIdFieldString(namingConvention)
+        + " = '"
+        + coordinateId
+        + "'";
   }
 
   /**

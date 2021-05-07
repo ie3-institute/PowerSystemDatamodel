@@ -29,14 +29,10 @@ class CsvWeatherSourceIconTest extends Specification implements CsvTestDataMeta,
 	@Shared
 	IdCoordinateSource coordinateSource
 
-	@Shared
-	String folderPath
-
 	def setupSpec() {
 		coordinateSource = WeatherTestData.coordinateSource
 		def weatherFactory = new IconTimeBasedWeatherValueFactory()
-		folderPath = new File(getClass().getResource('/weather/icon').toURI()).absolutePath
-		source = new CsvWeatherSource(",", folderPath, new EntityPersistenceNamingStrategy(), coordinateSource, weatherFactory)
+		source = new CsvWeatherSource(",", iconWeatherFolderPath, new EntityPersistenceNamingStrategy(), coordinateSource, weatherFactory)
 	}
 
 	def "A CsvWeatherSource can read and correctly parse a single value for a specific date and coordinate"() {
@@ -106,7 +102,7 @@ class CsvWeatherSourceIconTest extends Specification implements CsvTestDataMeta,
 		def coordinateSource = Mock(IdCoordinateSource)
 		coordinateSource.getCoordinate(_) >> { args -> args[0] == 67775 ? Optional.of(expectedCoordinate) : Optional.empty() }
 		def weatherFactory = new IconTimeBasedWeatherValueFactory()
-		def source = new CsvWeatherSource(",", folderPath, new EntityPersistenceNamingStrategy(), coordinateSource, weatherFactory)
+		def source = new CsvWeatherSource(",", iconWeatherFolderPath, new EntityPersistenceNamingStrategy(), coordinateSource, weatherFactory)
 		def fieldToValues = new TreeMap<>(String.CASE_INSENSITIVE_ORDER)
 		fieldToValues.putAll(
 				[
@@ -153,7 +149,7 @@ class CsvWeatherSourceIconTest extends Specification implements CsvTestDataMeta,
 		given:
 		def coordinateSource = new WeatherTestData.DummyIdCoordinateSource()
 		def weatherFactory = new IconTimeBasedWeatherValueFactory()
-		def source = new CsvWeatherSource(",", folderPath, new EntityPersistenceNamingStrategy(), coordinateSource, weatherFactory)
+		def source = new CsvWeatherSource(",", iconWeatherFolderPath, new EntityPersistenceNamingStrategy(), coordinateSource, weatherFactory)
 		def fieldToValues = [
 			"datum"       : "2019-08-01 01:00:00",
 			"albRad"      : "13.015240669",
@@ -197,7 +193,7 @@ class CsvWeatherSourceIconTest extends Specification implements CsvTestDataMeta,
 		given:
 		def coordinateSource = new WeatherTestData.DummyIdCoordinateSource()
 		def weatherFactory = new IconTimeBasedWeatherValueFactory()
-		def source = new CsvWeatherSource(",", folderPath, new EntityPersistenceNamingStrategy(), coordinateSource, weatherFactory)
+		def source = new CsvWeatherSource(",", iconWeatherFolderPath, new EntityPersistenceNamingStrategy(), coordinateSource, weatherFactory)
 		def fieldToValues = [
 			"datum"   : "2019-08-01 01:00:00",
 			"albRad"  : "13.015240669",
@@ -240,7 +236,7 @@ class CsvWeatherSourceIconTest extends Specification implements CsvTestDataMeta,
 		given:
 		def coordinateSource = new WeatherTestData.DummyIdCoordinateSource()
 		def weatherFactory = new IconTimeBasedWeatherValueFactory()
-		def source = new CsvWeatherSource(",", folderPath, new EntityPersistenceNamingStrategy(), coordinateSource, weatherFactory)
+		def source = new CsvWeatherSource(",", iconWeatherFolderPath, new EntityPersistenceNamingStrategy(), coordinateSource, weatherFactory)
 		def fieldToValues = [
 			"datum"       : "2019-08-01 01:00:00",
 			"albrad"      : "13.015240669",

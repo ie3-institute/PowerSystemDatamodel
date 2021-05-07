@@ -55,7 +55,9 @@ abstract class WeatherTestData {
 			return [
 				GeoUtils.xyToPoint(49d, 7d),
 				GeoUtils.xyToPoint(49d, 8d),
-				GeoUtils.xyToPoint(50d, 7d)
+				GeoUtils.xyToPoint(50d, 7d),
+				GeoUtils.xyToPoint(50d, 8d),
+				GeoUtils.xyToPoint(51d, 7d)
 			]
 		}
 	}

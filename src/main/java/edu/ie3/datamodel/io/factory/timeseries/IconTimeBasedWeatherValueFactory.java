@@ -29,8 +29,6 @@ import tech.units.indriya.unit.Units;
  */
 public class IconTimeBasedWeatherValueFactory extends TimeBasedWeatherValueFactory {
   /* Redefine the column names to meet the icon specifications */
-  private static final String COORDINATE = "coordinateid";
-  private static final String TIME = "datum";
   private static final String DIFFUSE_IRRADIANCE = "aswdifdS";
   private static final String DIRECT_IRRADIANCE = "aswdirS";
   private static final String TEMPERATURE = "t2m";
@@ -47,11 +45,6 @@ public class IconTimeBasedWeatherValueFactory extends TimeBasedWeatherValueFacto
 
   public IconTimeBasedWeatherValueFactory() {
     super(new TimeUtil(ZoneId.of("UTC"), Locale.GERMANY, "yyyy-MM-dd HH:mm:ss"));
-  }
-
-  @Override
-  public String getCoordinateIdFieldString() {
-    return COORDINATE;
   }
 
   @Override

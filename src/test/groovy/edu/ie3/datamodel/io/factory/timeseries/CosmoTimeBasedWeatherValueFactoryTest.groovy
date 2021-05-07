@@ -8,27 +8,27 @@ package edu.ie3.datamodel.io.factory.timeseries
 import edu.ie3.datamodel.models.StandardUnits
 import edu.ie3.datamodel.models.timeseries.individual.TimeBasedValue
 import edu.ie3.datamodel.models.value.WeatherValue
-import edu.ie3.test.common.PsdmWeatherTestData
+import edu.ie3.test.common.CosmoWeatherTestData
 import edu.ie3.util.TimeUtil
 import spock.lang.Specification
 import tech.units.indriya.quantity.Quantities
 
-class PsdmTimeBasedWeatherValueFactoryTest extends Specification {
+class CosmoTimeBasedWeatherValueFactoryTest extends Specification {
 
 	def "A PsdmTimeBasedWeatherValueFactory should be able to create time series with missing values"() {
 		given:
-		def factory = new PsdmTimeBasedWeatherValueFactory("yyyy-MM-dd HH:mm:ss")
-		def coordinate = PsdmWeatherTestData.COORDINATE_193186
+		def factory = new CosmoTimeBasedWeatherValueFactory("yyyy-MM-dd HH:mm:ss")
+		def coordinate = CosmoWeatherTestData.COORDINATE_193186
 		def time = TimeUtil.withDefaults.toZonedDateTime("2019-01-01 00:00:00")
 
 		Map<String, String> parameter = [
-			"uuid"               : "980f7714-8def-479f-baae-4deed6c8d6d1",
-			"time"               : TimeUtil.withDefaults.toString(time),
-			"diffuseirradiation": "282.671997070312",
-			"directirradiation" : "286.872985839844",
-			"temperature"        : "",
-			"winddirection"     : "0",
-			"windvelocity"      : "1.66103506088257"
+			"uuid"             : "980f7714-8def-479f-baae-4deed6c8d6d1",
+			"time"             : TimeUtil.withDefaults.toString(time),
+			"diffuseirradiance": "282.671997070312",
+			"directirradiance" : "286.872985839844",
+			"temperature"      : "",
+			"winddirection"    : "0",
+			"windvelocity"     : "1.66103506088257"
 		]
 
 		def data = new TimeBasedWeatherValueData(parameter, coordinate)
@@ -50,18 +50,18 @@ class PsdmTimeBasedWeatherValueFactoryTest extends Specification {
 
 	def "A PsdmTimeBasedWeatherValueFactory should be able to create time series values"() {
 		given:
-		def factory = new PsdmTimeBasedWeatherValueFactory("yyyy-MM-dd HH:mm:ss")
-		def coordinate = PsdmWeatherTestData.COORDINATE_193186
+		def factory = new CosmoTimeBasedWeatherValueFactory("yyyy-MM-dd HH:mm:ss")
+		def coordinate = CosmoWeatherTestData.COORDINATE_193186
 		def time = TimeUtil.withDefaults.toZonedDateTime("2019-01-01 00:00:00")
 
 		Map<String, String> parameter = [
-			"time"               : TimeUtil.withDefaults.toString(time),
-			"uuid"               : "980f7714-8def-479f-baae-4deed6c8d6d1",
-			"diffuseirradiation": "282.671997070312",
-			"directirradiation" : "286.872985839844",
-			"temperature"        : "278.019012451172",
-			"winddirection"     : "0",
-			"windvelocity"      : "1.66103506088257"
+			"time"             : TimeUtil.withDefaults.toString(time),
+			"uuid"             : "980f7714-8def-479f-baae-4deed6c8d6d1",
+			"diffuseirradiance": "282.671997070312",
+			"directirradiance" : "286.872985839844",
+			"temperature"      : "278.019012451172",
+			"winddirection"    : "0",
+			"windvelocity"     : "1.66103506088257"
 		]
 
 		def data = new TimeBasedWeatherValueData(parameter, coordinate)

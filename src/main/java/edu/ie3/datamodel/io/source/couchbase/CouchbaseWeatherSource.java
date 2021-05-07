@@ -19,6 +19,7 @@ import edu.ie3.datamodel.models.timeseries.individual.IndividualTimeSeries;
 import edu.ie3.datamodel.models.timeseries.individual.TimeBasedValue;
 import edu.ie3.datamodel.models.value.WeatherValue;
 import edu.ie3.util.interval.ClosedInterval;
+import edu.ie3.util.naming.NamingConvention;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -33,6 +34,8 @@ import org.locationtech.jts.geom.Point;
 /** Couchbase Source for weather data */
 public class CouchbaseWeatherSource implements WeatherSource {
   private static final Logger logger = LogManager.getLogger(CouchbaseWeatherSource.class);
+
+  private static final NamingConvention DEFAULT_NAMING_CONVENTION = NamingConvention.FLAT;
   private static final String DEFAULT_TIMESTAMP_PATTERN = "yyyy-MM-dd'T'HH:mm:ssxxx";
   /** The start of the document key, comparable to a table name in relational databases */
   private static final String DEFAULT_KEY_PREFIX = "weather";
@@ -43,25 +46,60 @@ public class CouchbaseWeatherSource implements WeatherSource {
   private final CouchbaseConnector connector;
   private final IdCoordinateSource coordinateSource;
   private final String coordinateIdColumnName;
+  private final String timeStampPattern;
 
   /**
    * Instantiate a weather source utilising a connection to a couchbase instance obtained via the
    * connector. This convenient constructor uses the {@link
-   * CouchbaseWeatherSource#DEFAULT_KEY_PREFIX} as key prefix.
+   * CouchbaseWeatherSource#DEFAULT_KEY_PREFIX} as key prefix and {@link
+   * CouchbaseWeatherSource#DEFAULT_NAMING_CONVENTION} as naming convention.
    *
    * @param connector Connector, that establishes the connection to the couchbase instance
    * @param coordinateSource Source to obtain actual coordinates from
-   * @param coordinateIdColumnName Name of the column containing the information about the
-   *     coordinate identifier
    * @param weatherFactory Factory to transfer field to value mapping into actual java object
    *     instances
+   * @param timeStampPattern Pattern of time stamps to parse
    */
   public CouchbaseWeatherSource(
       CouchbaseConnector connector,
       IdCoordinateSource coordinateSource,
-      String coordinateIdColumnName,
+      TimeBasedWeatherValueFactory weatherFactory,
+      String timeStampPattern) {
+    this(
+        connector,
+        coordinateSource,
+        DEFAULT_KEY_PREFIX,
+        DEFAULT_TIMESTAMP_PATTERN,
+        DEFAULT_NAMING_CONVENTION,
+        weatherFactory);
+  }
+
+  /**
+   * Instantiate a weather source utilising a connection to a couchbase instance obtained via the
+   * connector. Uses {@link CouchbaseWeatherSource#DEFAULT_NAMING_CONVENTION} as naming convention.
+   *
+   * @param connector Connector, that establishes the connection to the couchbase instance
+   * @param coordinateSource Source to obtain actual coordinates from
+   * @param keyPrefix Prefix of entries, that belong to weather
+   * @param weatherFactory Factory to transfer field to value mapping into actual java object
+   *     instances
+   * @deprecated Use {@link CouchbaseWeatherSource#CouchbaseWeatherSource(CouchbaseConnector,
+   *     IdCoordinateSource, String, String, NamingConvention, TimeBasedWeatherValueFactory)}
+   *     instead
+   */
+  @Deprecated
+  public CouchbaseWeatherSource(
+      CouchbaseConnector connector,
+      IdCoordinateSource coordinateSource,
+      String keyPrefix,
       TimeBasedWeatherValueFactory weatherFactory) {
-    this(connector, coordinateSource, coordinateIdColumnName, DEFAULT_KEY_PREFIX, weatherFactory);
+    this(
+        connector,
+        coordinateSource,
+        keyPrefix,
+        DEFAULT_TIMESTAMP_PATTERN,
+        DEFAULT_NAMING_CONVENTION,
+        weatherFactory);
   }
 
   /**
@@ -70,23 +108,25 @@ public class CouchbaseWeatherSource implements WeatherSource {
    *
    * @param connector Connector, that establishes the connection to the couchbase instance
    * @param coordinateSource Source to obtain actual coordinates from
-   * @param coordinateIdColumnName Name of the column containing the information about the
-   *     coordinate identifier
    * @param keyPrefix Prefix of entries, that belong to weather
+   * @param timeStampPattern Pattern of time stamps to parse
+   * @param namingConvention the (case) convention, how columns are named
    * @param weatherFactory Factory to transfer field to value mapping into actual java object
    *     instances
    */
   public CouchbaseWeatherSource(
       CouchbaseConnector connector,
       IdCoordinateSource coordinateSource,
-      String coordinateIdColumnName,
       String keyPrefix,
+      String timeStampPattern,
+      NamingConvention namingConvention,
       TimeBasedWeatherValueFactory weatherFactory) {
     this.connector = connector;
     this.coordinateSource = coordinateSource;
-    this.coordinateIdColumnName = coordinateIdColumnName;
     this.keyPrefix = keyPrefix;
     this.weatherFactory = weatherFactory;
+    this.timeStampPattern = timeStampPattern;
+    this.coordinateIdColumnName = weatherFactory.getCoordinateIdFieldString(namingConvention);
   }
 
   @Override
@@ -164,7 +204,7 @@ public class CouchbaseWeatherSource implements WeatherSource {
   public String generateWeatherKey(ZonedDateTime time, Integer coordinateId) {
     String key = keyPrefix + "::";
     key += coordinateId + "::";
-    key += time.format(DateTimeFormatter.ofPattern(DEFAULT_TIMESTAMP_PATTERN));
+    key += time.format(DateTimeFormatter.ofPattern(timeStampPattern));
     return key;
   }
 

@@ -1,0 +1,56 @@
+[
+  {
+    "coordinateid": 193186,
+    "time": "2020-04-28T15:00:00+00:00",
+    "diffuseirradiance": 286.872985839844,
+    "directirradiance": 282.671997070312,
+    "temperature": 278.019012451172,
+    "winddirection": 0,
+    "windvelocity": 1.66103506088257
+  },
+  {
+    "coordinateid": 193187,
+    "time": "2020-04-28T15:00:00+00:00",
+    "diffuseirradiance": 287.872985839844,
+    "directirradiance": 283.671997070312,
+    "temperature": 279.019012451172,
+    "winddirection": 0,
+    "windvelocity": 1.76103506088257
+  },
+  {
+    "coordinateid": 193188,
+    "time": "2020-04-28T15:00:00+00:00",
+    "diffuseirradiance": 288.872985839844,
+    "directirradiance": 284.671997070312,
+    "temperature": 280.019012451172,
+    "winddirection": 0,
+    "windvelocity": 1.86103506088257
+  },
+  {
+    "coordinateid": 193186,
+    "time": "2020-04-28T16:00:00+00:00",
+    "diffuseirradiance": 286.872,
+    "directirradiance": 282.672,
+    "temperature": 278.012,
+    "winddirection": 0,
+    "windvelocity": 1.662
+  },
+  {
+    "coordinateid": 193187,
+    "time": "2020-04-28T16:00:00+00:00",
+    "diffuseirradiance": 287.872,
+    "directirradiance": 283.672,
+    "temperature": 279.012,
+    "winddirection": 0,
+    "windvelocity": 1.762
+  },
+  {
+    "coordinateid": 193186,
+    "time": "2020-04-28T17:00:00+00:00",
+    "diffuseirradiance": 286.873,
+    "directirradiance": 282.673,
+    "temperature": 278.013,
+    "winddirection": 0,
+    "windvelocity": 1.663
+  }
+]
